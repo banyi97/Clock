@@ -41,20 +41,30 @@ void InitUart(){
 	GPIO_PinModeSet(gpioPortE, 0, gpioModePushPull, 1);
 	GPIO_PinModeSet(gpioPortE, 1, gpioModeInput, 0);
 
-	GPIO->P[5].DOUT |= (1 << 7);
+	GPIO->P[5].DOUT |= (1 << 7); // VCOM port engedelyezese
 	UART0->ROUTE = (UART0->ROUTE & ~_UART_ROUTE_LOCATION_MASK) | UART_ROUTE_LOCATION_LOC1;
 	UART0->ROUTE |= UART_ROUTE_RXPEN | UART_ROUTE_TXPEN;
 
 	USART_IntEnable(UART0, UART_IF_RXDATAV);
+
+	NVIC_ClearPendingIRQ(UART0_RX_IRQn);
+	NVIC_ClearPendingIRQ(UART0_TX_IRQn);
+	NVIC_EnableIRQ(UART0_RX_IRQn);
+
 }
 void InitGpio(){
-	// Configure PB9 and PB10 as input - buttons
+	// PB9 es PB10 inputkent kezelese - buttons
 	GPIO_PinModeSet(gpioPortB, 9, gpioModeInput, 0);
 	GPIO_PinModeSet(gpioPortB, 10, gpioModeInput, 0);
 
-	// Set falling edge interrupt for both ports
+	// Felfuto es lefuto elre it engedelyezese mindket portra
 	GPIO_IntConfig(gpioPortB, 9, true, true, true);
 	GPIO_IntConfig(gpioPortB, 10, true, true, true);
+
+	NVIC_ClearPendingIRQ(GPIO_EVEN_IRQn); // clear buttons it flags
+	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
+	NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
+	NVIC_EnableIRQ(GPIO_ODD_IRQn);
 }
 void InitRtc(){
 	RTC_Init_TypeDef rtcInit = RTC_INIT_DEFAULT;
@@ -64,4 +74,7 @@ void InitRtc(){
 	RTC_Init(&rtcInit);
  	RTC_CompareSet(0, ((RTC_FREQ / 32)) - 1); // Interupt in every secound
  	RTC_IntEnable(RTC_IEN_COMP0);
+ 	NVIC_ClearPendingIRQ(RTC_IRQn);
+ 	NVIC_EnableIRQ(RTC_IRQn);
+	RTC_Enable(true);
 }
