@@ -11,7 +11,7 @@
 #include "../inc/re.h"
 #include <math.h>
 
-#define tizpercSzundi 600; // 60s * 10min = 600 -> teszthez 6
+#define tizpercSzundi 600; // 60s * 10min = 600
 
 struct Buffer {
 	unsigned char character[16];
@@ -124,7 +124,7 @@ void sendError(void){ // elkuldi a hibauzenetet
  commandError = false;
 }
 
-void setCommands(void){
+void setCommands(void){ // beallitja a kapott parancsot a ervenyes, ellenben errort kuld vissza
 	newCommand = false;
 	switch(checkCommantIsValid()){
 		case 'C':
@@ -134,10 +134,12 @@ void setCommands(void){
 			break;
 		case 'W':
 			if(setAlertTime()){
-				start = true;
-				SegmentLCD_Symbol(LCD_SYMBOL_COL10, 1); // lcd number :
-				SegmentLCD_Symbol(LCD_SYMBOL_COL3, 1);  // hexa lcd :
-				SegmentLCD_Symbol(LCD_SYMBOL_COL5, 1);	// hexa lcd :
+				if(!start){
+					start = true;
+					SegmentLCD_Symbol(LCD_SYMBOL_COL10, 1); // lcd number :
+					SegmentLCD_Symbol(LCD_SYMBOL_COL3, 1);  // hexa lcd :
+					SegmentLCD_Symbol(LCD_SYMBOL_COL5, 1);	// hexa lcd :
+				}
 				SegmentLCD_Number(alert.hour*100 + alert.min);
 			}
 			else{
@@ -278,21 +280,13 @@ int main(void)
 		  printGecko = nincsHiba;
 		  SegmentLCD_Symbol(LCD_SYMBOL_GECKO, 0);
 	  }
-	  if(!start){
-		  if(commandError){
-			  sendError();
-		  }
-		  if(newCommand){
-			  setCommands();
-		  }
+	  if(commandError){
+		  sendError();
 	  }
-	  else{
-		  if(commandError){
-		  	sendError();
-		  }
-		  if(newCommand){
-		  	setCommands();
-		  }
+	  if(newCommand){
+		  setCommands();
+	  }
+	  if(start){
 		  char time[6];
 		  sprintf(time, "%02d%02d%02d", clock.hour,clock.min,clock.sec);
 		  SegmentLCD_Write(time);
