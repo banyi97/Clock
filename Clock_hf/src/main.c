@@ -11,7 +11,7 @@
 #include "../inc/re.h"
 #include <math.h>
 
-#define tizpercSzundi 6; // 60s * 10min = 600 -> teszthez 6
+#define tizpercSzundi 600; // 60s * 10min = 600 -> teszthez 6
 
 struct Buffer {
 	unsigned char character[16];
@@ -122,6 +122,33 @@ void sendError(void){ // elkuldi a hibauzenetet
 	 }
  }
  commandError = false;
+}
+
+void setCommands(void){
+	newCommand = false;
+	switch(checkCommantIsValid()){
+		case 'C':
+			if(!setClockTime()){
+				sendError();
+			}
+			break;
+		case 'W':
+			if(setAlertTime()){
+				start = true;
+				SegmentLCD_Symbol(LCD_SYMBOL_COL10, 1); // lcd number :
+				SegmentLCD_Symbol(LCD_SYMBOL_COL3, 1);  // hexa lcd :
+				SegmentLCD_Symbol(LCD_SYMBOL_COL5, 1);	// hexa lcd :
+				SegmentLCD_Number(alert.hour*100 + alert.min);
+			}
+			else{
+				sendError();
+			}
+			break;
+		case 'R':
+			setAlertOnOff();
+			break;
+		default: sendError();
+	}
 }
 
 volatile bool risingEdgeEven = false;
@@ -256,36 +283,20 @@ int main(void)
 			  sendError();
 		  }
 		  if(newCommand){
-			  newCommand = false;
-			  switch(checkCommantIsValid()){
-			  case 'C':
-			  	if(!setClockTime()){
-			  		sendError();
-			  	}
-			  	break;
-			  case 'W':
-			  	if(setAlertTime()){
-			  		start = true;
-			  		SegmentLCD_Symbol(LCD_SYMBOL_COL10, 1); // lcd number :
-			  		SegmentLCD_Symbol(LCD_SYMBOL_COL3, 1);  // hexa lcd :
-			  		SegmentLCD_Symbol(LCD_SYMBOL_COL5, 1);	// hexa lcd :
-			  		SegmentLCD_Number(alert.hour*100 + alert.min);
-			  	}
-			  	else{
-			  		sendError();
-			  	}
-			  	break;
-			  case 'R':
-				  setAlertOnOff();
-				  break;
-			  default: sendError();
-			  }
+			  setCommands();
 		  }
 	  }
 	  else{
+		  if(commandError){
+		  	sendError();
+		  }
+		  if(newCommand){
+		  	setCommands();
+		  }
 		  char time[6];
 		  sprintf(time, "%02d%02d%02d", clock.hour,clock.min,clock.sec);
 		  SegmentLCD_Write(time);
 	  }
+	 // SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk;
   }
 }
