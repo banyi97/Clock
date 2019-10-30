@@ -4,6 +4,7 @@
 #include "em_dma.h"
 #include "em_rtc.h"
 #include "bsp.h"
+#include "em_emu.h"
 #include "segmentlcd.h"
 #include <stdbool.h>
 #include <string.h>
@@ -291,6 +292,6 @@ int main(void)
 		  sprintf(time, "%02d%02d%02d", clock.hour,clock.min,clock.sec);
 		  SegmentLCD_Write(time);
 	  }
-	 // SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk;
+	  EMU_EnterEM1();
   }
 }
