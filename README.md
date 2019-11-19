@@ -1,5 +1,7 @@
 # Clock
 
+For Silabs EFM32 Giant Gecko Starter Kit
+
 C X:Y:Z CR+LF  
 C 12:12:12 \r\n  
 C 1:2:3 \r\n == C 01:02:03 \r\n  
