@@ -1,3 +1,3 @@
-#Clock V1
+# Clock V1
 
 Első verzió, minden megvalósitandó funkcióval.
